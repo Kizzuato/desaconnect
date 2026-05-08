@@ -6,26 +6,25 @@ on:
       - main
 
 env:
-  # Sesuaikan nilai-nilai berikut dengan resource AWS Anda
-  AWS_REGION: ap-southeast-2                   # Region AWS, misalnya ap-southeast-1 (Singapura)
-  ECR_REPOSITORY: kizzuato/desaconnect         # Nama repositori Amazon ECR Anda
-  ECS_SERVICE: task-ets2-service-7023invc      # Nama service Amazon ECS Fargate Anda
-  ECS_CLUSTER: Cluster-Pengaduan               # Nama cluster Amazon ECS Anda
-  ECS_TASK_DEFINITION: .aws/task-definition.json # Path ke file konfigurasi task definition ECS Anda
-  CONTAINER_NAME: desaconnect-app              # Nama container di dalam containerDefinitions task definition
+  AWS_REGION: ap-southeast-2
+  ECR_REPOSITORY: kizzuato/desaconnect
+  ECS_SERVICE: task-ets2-service-7023invc
+  ECS_CLUSTER: Cluster-Pengaduan
+  # Gunakan NAMA Task Definition (bukan path file) untuk didownload otomatis
+  ECS_TASK_DEFINITION_NAME: task-ets2 
+  # SESUAIKAN: Di screenshot kamu namanya 'ets2', bukan 'desaconnect-app'
+  CONTAINER_NAME: ets2 
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: production
-
     steps:
     - name: Checkout Kode Repositori
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4 # Update ke v4 biar gak warning
 
     - name: Setup AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v4 # Update ke v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -33,32 +32,33 @@ jobs:
 
     - name: Login ke Amazon ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      uses: aws-actions/amazon-ecr-login@v2
 
     - name: Build, tag, dan push image Docker ke Amazon ECR
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }} # Menggunakan commit hash sebagai tag (best practice)
+        IMAGE_TAG: ${{ github.sha }}
       run: |
-        echo "Building image..."
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        
-        echo "Pushing image..."
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    # LANGKAH KUNCI: Download spek asli dari AWS biar gak ada salah nama container
+    - name: Download task definition
+      run: |
+        aws ecs describe-task-definition --task-definition ${{ env.ECS_TASK_DEFINITION_NAME }} --query taskDefinition > task-definition.json
 
     - name: Sisipkan Image ID baru ke dalam Amazon ECS Task Definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: ${{ env.ECS_TASK_DEFINITION }}
+        task-definition: task-definition.json
         container-name: ${{ env.CONTAINER_NAME }}
         image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Task Definition baru ke Amazon ECS Fargate
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: ${{ env.ECS_SERVICE }}
