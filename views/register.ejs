@@ -1,0 +1,50 @@
+<%- include('partials/header', { hideSidebar: true }) %>
+
+<div class="min-h-screen flex items-center justify-center p-6">
+    <div class="w-full max-w-md">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg" style="background:linear-gradient(135deg,#0d9488,#0f766e);">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+            </div>
+            <h2 class="font-display text-3xl text-gray-800">Buat Akun Baru</h2>
+            <p class="text-gray-500 text-sm mt-1">Bergabung dengan komunitas warga Desa Sukamaju</p>
+        </div>
+
+        <div class="card-static p-8">
+            <% if (error) { %>
+                <div class="mb-5 px-4 py-3 rounded-xl text-sm font-medium" style="background:#fdf0ee; color:#c85a44; border:1px solid #f5c6be;">
+                    &#9888; <%= error %>
+                </div>
+            <% } %>
+
+            <form action="/register" method="POST" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1.5">Nama Lengkap</label>
+                    <input type="text" name="nama" required placeholder="John Doe" class="form-input">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1.5">Alamat Email</label>
+                    <input type="email" name="email" required placeholder="johndoe@example.com" class="form-input">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1.5">Password</label>
+                    <input type="password" name="password" required placeholder="Min. 8 karakter" class="form-input">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1.5">Konfirmasi Password</label>
+                    <input type="password" name="confirm_password" required placeholder="Ulangi password" class="form-input">
+                </div>
+                <button type="submit" class="btn-teal w-full py-3 text-sm mt-2">
+                    Daftar Sekarang
+                </button>
+            </form>
+        </div>
+
+        <p class="text-center text-sm text-gray-500 mt-5">
+            Sudah punya akun? <a href="/login" class="text-teal-600 font-semibold hover:underline">Masuk di sini</a>
+        </p>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

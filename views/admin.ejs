@@ -1,0 +1,159 @@
+<%- include('partials/header') %>
+
+<!-- TOP BAR -->
+<div class="relative overflow-hidden" style="background: linear-gradient(135deg, #0d9488 0%, #0f766e 60%, #134e4a 100%);">
+    <div class="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10" style="background:radial-gradient(circle, #fff 0%, transparent 70%); transform:translate(30%,-30%);"></div>
+    <div class="relative px-8 py-8">
+        <p class="text-teal-200 text-sm font-medium tracking-wide uppercase mb-1">Panel Administrator</p>
+        <h2 class="font-display text-3xl text-white">Kelola Laporan Masuk</h2>
+        <p class="text-teal-100 text-sm opacity-80 mt-1">Perbarui status laporan untuk menjaga transparansi pelayanan desa.</p>
+    </div>
+</div>
+
+<div class="px-8 py-8">
+    <div class="card p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="font-serif text-xl text-gray-800">Semua Laporan</h3>
+            <span class="text-xs text-gray-400 font-medium"><%= typeof reports !== 'undefined' ? reports.length : 0 %> laporan total</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b-2 border-gray-100">
+                        <th class="pb-4 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">#</th>
+                        <th class="pb-4 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Detail Laporan</th>
+                        <th class="pb-4 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Bukti Foto</th>
+                        <th class="pb-4 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tanggal</th>
+                        <th class="pb-4 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">Ubah Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    <% if (reports && reports.length > 0) { %>
+                        <% reports.forEach(function(report) { %>
+                            <tr>
+                                <td class="py-4 px-3 text-gray-400 font-medium text-sm">#<%= report.id %></td>
+                                <td class="py-4 px-3" style="max-width: 280px;">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 mt-0.5" style="background: linear-gradient(135deg, #0d9488, #0f766e);">
+                                            <%= report.nama_pelapor.charAt(0).toUpperCase() %>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-800 font-semibold text-sm leading-tight"><%= report.judul %></p>
+                                            <p class="text-xs text-gray-500 mt-0.5 line-clamp-2"><%= report.deskripsi %></p>
+                                            <p class="text-xs text-gray-400 mt-1">Oleh: <span class="font-medium text-gray-600"><%= report.nama_pelapor %></span></p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-3">
+                                    <% if (report.foto_url) { %>
+                                        <div class="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-gray-100 shadow-sm cursor-pointer" onclick="openDetailModal(<%= JSON.stringify(report) %>)">
+                                            <!-- Loader -->
+                                            <div class="absolute inset-0 bg-gray-50 flex items-center justify-center" id="loader-<%= report.id %>">
+                                                <svg class="animate-spin h-5 w-5 text-teal-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                            </div>
+                                            <!-- Gambar aktual -->
+                                            <img src="<%= report.foto_url %>" alt="Bukti" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300 hover:scale-105" onload="this.classList.remove('opacity-0'); document.getElementById('loader-<%= report.id %>').style.display='none';">
+                                        </div>
+                                    <% } else { %>
+                                        <div class="w-16 h-16 rounded-xl bg-gray-50 border-2 border-dashed border-gray-200 flex items-center justify-center">
+                                            <span class="text-xl opacity-40">🖼️</span>
+                                        </div>
+                                    <% } %>
+                                </td>
+                                <td class="py-4 px-3 text-gray-500 text-xs whitespace-nowrap"><%= formatDate(report.created_at) %></td>
+                                <td class="py-4 px-3 text-center">
+                                    <button onclick="openDetailModal(<%= JSON.stringify(report) %>)" class="text-xs text-teal-600 font-semibold hover:underline mr-2">Lihat Detail</button>
+                                </td>
+                                <td class="py-4 px-3">
+                                    <form action="/admin/update-status/<%= report.id %>" method="POST" class="flex justify-center">
+                                        <%
+                                            let selClass = 'bg-amber-50 border-amber-200 text-amber-800';
+                                            if (report.status === 'Proses') selClass = 'bg-teal-50 border-teal-200 text-teal-800';
+                                            if (report.status === 'Selesai') selClass = 'bg-green-50 border-green-200 text-green-800';
+                                        %>
+                                        <select name="status"
+                                            class="text-sm font-semibold rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-teal-300 cursor-pointer <%= selClass %>"
+                                            onchange="this.form.submit()">
+                                            <option value="Pending"  <%= report.status === 'Pending'  ? 'selected' : '' %>>⏳ Pending</option>
+                                            <option value="Proses"   <%= report.status === 'Proses'   ? 'selected' : '' %>>🔄 Proses</option>
+                                            <option value="Selesai"  <%= report.status === 'Selesai'  ? 'selected' : '' %>>✅ Selesai</option>
+                                        </select>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" class="py-16 text-center">
+                                <div class="text-5xl mb-3">📭</div>
+                                <p class="text-gray-400 font-medium">Belum ada laporan masuk.</p>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detail Laporan -->
+<div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl transform scale-95 transition-transform" id="modalContent">
+        <div class="flex items-center justify-between mb-4 border-b pb-3">
+            <h3 class="font-serif text-xl text-gray-800" id="modalJudul">Judul Laporan</h3>
+            <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Pelapor</p>
+                <p class="text-gray-800 font-medium" id="modalPelapor"></p>
+                <p class="text-gray-500 text-xs" id="modalEmail"></p>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Deskripsi Lengkap</p>
+                <p class="text-gray-700 text-sm leading-relaxed" id="modalDeskripsi"></p>
+            </div>
+            <div id="modalFotoContainer" class="hidden">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Bukti Foto</p>
+                <a id="modalFotoLink" href="#" target="_blank">
+                    <img id="modalFoto" src="" alt="Bukti" class="rounded-xl max-h-64 object-cover w-full border">
+                </a>
+            </div>
+        </div>
+        <div class="mt-6 pt-4 border-t flex justify-end">
+            <button onclick="closeDetailModal()" class="px-5 py-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 text-sm font-semibold transition-colors">Tutup</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDetailModal(report) {
+        document.getElementById('modalJudul').textContent = report.judul;
+        document.getElementById('modalPelapor').textContent = report.nama_pelapor;
+        document.getElementById('modalEmail').textContent = report.user_email || 'Email tidak tersedia';
+        document.getElementById('modalDeskripsi').textContent = report.deskripsi;
+        
+        if (report.foto_url) {
+            document.getElementById('modalFoto').src = report.foto_url;
+            document.getElementById('modalFotoLink').href = report.foto_url;
+            document.getElementById('modalFotoContainer').classList.remove('hidden');
+        } else {
+            document.getElementById('modalFotoContainer').classList.add('hidden');
+        }
+        
+        const modal = document.getElementById('detailModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    
+    function closeDetailModal() {
+        const modal = document.getElementById('detailModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+</script>
+
+<%- include('partials/footer') %>

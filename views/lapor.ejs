@@ -1,0 +1,72 @@
+<%- include('partials/header') %>
+
+<!-- TOP BAR -->
+<div class="relative overflow-hidden" style="background: linear-gradient(135deg, #0d9488 0%, #0f766e 60%, #134e4a 100%);">
+    <div class="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10" style="background:radial-gradient(circle, #fff 0%, transparent 70%); transform:translate(30%,-30%);"></div>
+    <div class="relative px-8 py-8">
+        <p class="text-teal-200 text-sm font-medium tracking-wide uppercase mb-1">Form Pengaduan</p>
+        <h2 class="font-display text-3xl text-white">Sampaikan Laporan Anda</h2>
+        <p class="text-teal-100 text-sm opacity-80 mt-1 max-w-lg">Ceritakan keluhan atau masukan Anda. Kami akan segera menindaklanjutinya.</p>
+    </div>
+</div>
+
+<div class="px-8 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="card p-8">
+            <form action="/lapor" method="POST" enctype="multipart/form-data" class="space-y-6">
+
+                <div>
+                    <label for="nama_pelapor" class="block text-sm font-semibold text-gray-600 mb-1.5">Nama Lengkap Pelapor</label>
+                    <input type="text" id="nama_pelapor" name="nama_pelapor" required placeholder="cth. Budi Santoso"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-all font-sans text-gray-700 placeholder-gray-300 bg-gray-50 focus:bg-white">
+                </div>
+
+                <div>
+                    <label for="judul" class="block text-sm font-semibold text-gray-600 mb-1.5">Judul Laporan</label>
+                    <input type="text" id="judul" name="judul" required placeholder="cth. Jalan Rusak di RT 03"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-all font-sans text-gray-700 placeholder-gray-300 bg-gray-50 focus:bg-white">
+                </div>
+
+                <div>
+                    <label for="deskripsi" class="block text-sm font-semibold text-gray-600 mb-1.5">Deskripsi Lengkap</label>
+                    <textarea id="deskripsi" name="deskripsi" rows="5" required placeholder="Jelaskan permasalahan secara detail: lokasi, waktu kejadian, dan dampaknya..."
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-all font-sans text-gray-700 placeholder-gray-300 bg-gray-50 focus:bg-white resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1.5">Bukti Foto (Opsional)</label>
+                    <div class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-teal-400 transition-colors cursor-pointer bg-gray-50 hover:bg-teal-50"
+                         onclick="document.getElementById('foto').click()">
+                        <div class="text-4xl mb-2">📷</div>
+                        <p class="text-sm font-medium text-gray-500">Klik untuk memilih foto</p>
+                        <p class="text-xs text-gray-400 mt-1">PNG, JPG hingga 5MB</p>
+                        <p id="file-name" class="text-sm text-teal-600 font-semibold mt-2"></p>
+                        <input id="foto" name="foto" type="file" accept="image/*" class="sr-only"
+                               onchange="document.getElementById('file-name').textContent = this.files[0] ? '✓ ' + this.files[0].name : ''">
+                    </div>
+                </div>
+
+                <div class="pt-2 flex gap-3">
+                    <a href="/" class="flex-1 text-center px-6 py-3 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-colors text-sm">
+                        ← Kembali
+                    </a>
+                    <button type="submit" class="btn-terra flex-1 px-6 py-3 text-sm">
+                        Kirim Laporan 🚀
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Tips Card -->
+        <div class="mt-4 rounded-xl p-4 flex gap-3" style="background:#f0fdfa; border: 1px solid #ccfbf1;">
+            <span class="text-lg flex-shrink-0">💡</span>
+            <div>
+                <p class="text-sm font-semibold text-teal-800">Tips Laporan yang Baik</p>
+                <p class="text-xs text-teal-700 opacity-80 mt-0.5">Sertakan foto pendukung dan lokasi yang jelas agar petugas dapat menindaklanjuti laporan Anda dengan cepat dan tepat.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

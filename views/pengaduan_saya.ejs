@@ -1,0 +1,135 @@
+<%- include('partials/header') %>
+
+    <!-- TOP BAR -->
+    <div class="relative overflow-hidden"
+        style="background:linear-gradient(135deg,#0d9488 0%,#0f766e 60%,#134e4a 100%);">
+        <div class="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10"
+            style="background:radial-gradient(circle,#fff 0%,transparent 70%);transform:translate(30%,-30%);"></div>
+        <div class="relative px-8 py-8 flex items-center justify-between">
+            <div>
+                <p class="text-teal-200 text-sm font-medium tracking-wide uppercase mb-1">Riwayat Pengaduan</p>
+                <h2 class="font-display text-3xl text-white">Pengaduan Saya</h2>
+                <p class="text-teal-100 text-sm opacity-80 mt-1">Pantau status seluruh laporan yang telah Anda kirimkan.
+                </p>
+            </div>
+            <a href="/lapor" class="btn-terra px-6 py-3 text-sm flex-shrink-0">+ Buat Laporan Baru</a>
+        </div>
+    </div>
+
+    <div class="px-8 py-6">
+
+        <% if (success) { %>
+            <div class="mb-5 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-3"
+                style="background:#f0fdf4;color:#166534;border:1px solid #86efac;">
+                <span class="text-lg">&#10003;</span> Laporan Anda berhasil dikirim! Kami akan segera
+                menindaklanjutinya.
+            </div>
+            <% } %>
+
+                <% if (reports && reports.length> 0) { %>
+                    <div class="space-y-4">
+                        <% reports.forEach(function(report) { %>
+                            <div class="card p-6 flex items-start justify-between gap-6">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-3 mb-2 flex-wrap">
+                                        <!-- Status Badge Ekspresif -->
+                                        <% if (report.status==='Pending' ) { %>
+                                            <span
+                                                class="badge-pending px-3 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1.5">
+                                                <span
+                                                    class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-pulse"></span>Diterima
+                                                &bull; Menunggu
+                                            </span>
+                                            <% } else if (report.status==='Proses' ) { %>
+                                                <span
+                                                    class="badge-proses px-3 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1.5">
+                                                    <span
+                                                        class="w-1.5 h-1.5 rounded-full bg-teal-400 inline-block animate-pulse"></span>Sedang
+                                                    Diproses
+                                                </span>
+                                                <% } else if (report.status==='Selesai' ) { %>
+                                                    <span
+                                                        class="badge-selesai px-3 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1.5">
+                                                        <span
+                                                            class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>Selesai
+                                                        &#10003;
+                                                    </span>
+                                                    <% } %>
+                                                        <span class="text-xs text-gray-400">ID #<%= report.id %></span>
+                                    </div>
+
+                                    <h3 class="font-serif text-lg text-gray-800 leading-snug truncate">
+                                        <%= report.judul %>
+                                    </h3>
+                                    <p class="text-sm text-gray-500 mt-1 line-clamp-2">
+                                        <%= report.deskripsi %>
+                                    </p>
+                                    <p class="text-xs text-gray-400 mt-2">Dikirim: <%= formatDate(report.created_at) %>
+                                    </p>
+
+                                    <!-- Progress bar status -->
+                                    <% const isProses=report.status==='Proses' || report.status==='Selesai' ; const
+                                        isSelesai=report.status==='Selesai' ; %>
+                                        <div class="mt-4">
+                                            <div class="flex items-center gap-0">
+                                                <!-- Step 1: Diterima -->
+                                                <div class="flex flex-col items-center">
+                                                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                                                        style="background:#0d9488;">1</div>
+                                                    <span
+                                                        class="text-xs text-gray-500 mt-1 whitespace-nowrap">Diterima</span>
+                                                </div>
+                                                <div class="flex-1 h-1 mx-1 rounded <%= isProses ? '' : 'opacity-30' %>"
+                                                    style="background:<%= isProses ? '#0d9488' : '#d1d5db' %>;"></div>
+                                                <!-- Step 2: Diproses -->
+                                                <div class="flex flex-col items-center">
+                                                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold <%= isProses ? 'text-white' : 'text-gray-400' %>"
+                                                        style="background:<%= isProses ? '#0d9488' : '#e5e7eb' %>;">2
+                                                    </div>
+                                                    <span
+                                                        class="text-xs text-gray-500 mt-1 whitespace-nowrap">Diproses</span>
+                                                </div>
+                                                <div class="flex-1 h-1 mx-1 rounded"
+                                                    style="background:<%= isSelesai ? '#228B22' : '#d1d5db' %>; opacity:<%= isSelesai ? '1' : '0.3' %>;">
+                                                </div>
+                                                <!-- Step 3: Selesai -->
+                                                <div class="flex flex-col items-center">
+                                                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold <%= isSelesai ? 'text-white' : 'text-gray-400' %>"
+                                                        style="background:<%= isSelesai ? '#228B22' : '#e5e7eb' %>;">3
+                                                    </div>
+                                                    <span
+                                                        class="text-xs text-gray-500 mt-1 whitespace-nowrap">Selesai</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </div>
+
+                                <!-- Foto & Detail -->
+                                <div class="flex flex-col items-end gap-3 flex-shrink-0">
+                                    <% if (report.foto_url) { %>
+                                        <a href="<%= report.foto_url %>" target="_blank"
+                                            class="block w-20 h-20 rounded-xl overflow-hidden border-2 border-gray-100 shadow-sm hover:shadow-md hover:scale-105 transition-all">
+                                            <img src="<%= report.foto_url %>" alt="Bukti"
+                                                class="w-full h-full object-cover">
+                                        </a>
+                                        <% } %>
+                                            <a href="/pengaduan-saya/<%= report.id %>"
+                                                class="text-xs text-teal-600 font-semibold hover:underline whitespace-nowrap">
+                                                Lihat Detail &rarr;
+                                            </a>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } else { %>
+                        <div class="card p-16 text-center">
+                            <div class="text-6xl mb-4">&#x1F4ED;</div>
+                            <h3 class="font-serif text-xl text-gray-700 mb-2">Belum Ada Pengaduan</h3>
+                            <p class="text-gray-400 text-sm mb-6">Anda belum pernah mengirimkan laporan. Sampaikan
+                                keluhan Anda sekarang.</p>
+                            <a href="/lapor" class="btn-terra px-8 py-3 text-sm">Buat Laporan Pertama</a>
+                        </div>
+                        <% } %>
+    </div>
+
+    <%- include('partials/footer') %>
