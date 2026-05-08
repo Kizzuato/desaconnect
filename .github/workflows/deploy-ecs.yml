@@ -8,9 +8,9 @@ on:
 env:
   # Sesuaikan nilai-nilai berikut dengan resource AWS Anda
   AWS_REGION: ap-southeast-2                   # Region AWS, misalnya ap-southeast-1 (Singapura)
-  ECR_REPOSITORY: desaconnect                  # Nama repositori Amazon ECR Anda
-  ECS_SERVICE: desaconnect-service             # Nama service Amazon ECS Fargate Anda
-  ECS_CLUSTER: desaconnect-cluster             # Nama cluster Amazon ECS Anda
+  ECR_REPOSITORY: kizzuato/desaconnect         # Nama repositori Amazon ECR Anda
+  ECS_SERVICE: task-ets2-service-7023invc      # Nama service Amazon ECS Fargate Anda
+  ECS_CLUSTER: Cluster-Pengaduan               # Nama cluster Amazon ECS Anda
   ECS_TASK_DEFINITION: .aws/task-definition.json # Path ke file konfigurasi task definition ECS Anda
   CONTAINER_NAME: desaconnect-app              # Nama container di dalam containerDefinitions task definition
 
