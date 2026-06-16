@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
 const multer = require('multer');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { BlobServiceClient } = require('@azure/storage-blob');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const bcrypt = require('bcryptjs');
@@ -34,8 +34,8 @@ app.use(session({
   cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }, // 30 days
 }));
 
-// S3 Client
-const s3Client = new S3Client({ region: process.env.AWS_REGION });
+// Azure Blob Client
+const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
 
 // Multer memory storage
 const upload = multer({
@@ -243,16 +243,13 @@ app.post('/lapor', requireWarga, upload.single('foto'), async (req, res) => {
     if (req.file) {
       const fileExtension = path.extname(req.file.originalname);
       const fileName = `${uuidv4()}${fileExtension}`;
-      await s3Client.send(new PutObjectCommand({
-        Bucket: process.env.S3_BUCKET,
-        Key: `reports/${fileName}`,
-        Body: req.file.buffer,
-        ContentType: req.file.mimetype,
-      }));
-      const cloudfrontUrl = (process.env.CLOUDFRONT_URL || '').replace(/\/$/, '');
-      foto_url = cloudfrontUrl
-        ? `${cloudfrontUrl}/reports/${fileName}`
-        : `https://${process.env.S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/reports/${fileName}`;
+      const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_STORAGE_CONTAINER_NAME);
+      const blockBlobClient = containerClient.getBlockBlobClient(`reports/${fileName}`);
+      
+      await blockBlobClient.uploadData(req.file.buffer, {
+        blobHTTPHeaders: { blobContentType: req.file.mimetype }
+      });
+      foto_url = blockBlobClient.url;
     }
 
     await pool.query(
